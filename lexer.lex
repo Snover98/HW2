@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include "tokens.h"
 
 #define NON_ESCAPE 'E'
 #define HEXADECIMAL 'X'
