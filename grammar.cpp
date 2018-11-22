@@ -5,7 +5,7 @@
 
 void print_token(tokens tok) {
     switch (tok) {
-        case KEY: std::cout << "KEY delete"; break;
+        case KEY: std::cout << "KEY"; break;
         case SECTION: std::cout << "SECTION"; break;
         case INDENT: std::cout << "INDENT"; break;
         case ASSIGN: std::cout << "ASSIGN"; break;
