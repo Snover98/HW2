@@ -53,18 +53,13 @@ void updateSet(std::set<tokens>& dest, token item, bool* b){
 }
 
 //copy all the elements in the set source to the set dest
-void insert_first (std::set<tokens>& dest, std::set<tokens> & source, bool* b){
+void insert_set (std::set<tokens>& dest, std::set<tokens> & source, bool* b){
     for (std::set<tokens>::iterator it = source.begin() ; it != source.end(); ++it){
         updateSet(dest, *it, b);
     }
 }
 
-/**
- * computes first for all nonterminal (see nonterminal enum in grammar.h)
- * calls print_first when finished
- */
-void compute_first(){
-    std::vector< std::set<tokens> > first;
+void compute_vector_first(std::vector< std::set<tokens> >& first){
     //initiate first to contain NONTERMINAL_ENUM_SIZE empty sets
     for (int i=0;i<NONTERMINAL_ENUM_SIZE;i++){
         first.push_back({});
@@ -82,28 +77,86 @@ void compute_first(){
                     // first[(*it_g).lhs].insert(*it);
                     break;
                 }
-                insert_first(first[(*it_g).lhs], first[*it], &finished); //for X->AB : first(X)<-first(A) U first(B)
+                insert_set(first[(*it_g).lhs], first[*it], &finished); //for X->AB : first(X)<-first(A) U first(B)
                 if (!is_nullable(*it)){//checks if the current nonterminal of the rhs is nullable
                     break;
                 }
             }
         }
     }
+    return first;
+}
 
+/**
+ * computes first for all nonterminal (see nonterminal enum in grammar.h)
+ * calls print_first when finished
+ */
+void compute_first(){
+    std::vector< std::set<tokens> > first;
+    compute_vector_first(first);
     print_first(first);
 }
+
+void compute_vector_follow(std::vector< std::set<tokens> >& follow){
+    std::vector< std::set<tokens> > first;
+    compute_vector_first(first);
+    //initiate follow to contain NONTERMINAL_ENUM_SIZE empty sets
+    for (int i = 0; i < NONTERMINAL_ENUM_SIZE; i++) {
+        follow.push_back({});
+    }
+    (follow[0]).insert(EF); // TODO check if right
+
+    bool finished = false;//false when any more changes accures
+
+    while (!finished) {
+        finished = true;
+        //going over all the nonterminal
+        for (int i = 0; i < NONTERMINAL_ENUM_SIZE; i++) {
+            //going over all the grammar
+            for (std::vector<grammar_rule>::iterator it_g = grammar.begin(); it_g != grammar.end(); ++it_g) {
+                for (std::vector<int>::iterator it = (*it_g).rhs.begin(); it != (*it_g).rhs.end(); ++it) {
+                    if ((*it) == i && (it + 1) != (*it_g).rhs.end()) {
+                        insert_set(follow[i], first[*(it + 1)], &finished);
+                    }
+                    if ((it + 1) != (*it_g).rhs.end() && is_nullable(*(it + 1))) {
+                        insert_set(follow[i], follow[(*it_g).lhs], &finished);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 /**
  * computes follow for all nonterminal (see nonterminal enum in grammar.h)
  * calls print_follow when finished
  */
-void compute_follow();
+void compute_follow() {
+    std::vector<std::set<tokens> > follow;
+    compute_vector_follow(follow);
+    print_follow(follow);
+}
 
 /**
  * computes select for all grammar rules (see grammar global variable in grammar.h)
  * calls print_select when finished
  */
-void compute_select();
+void compute_select(){
+//    std::vector<std::set<tokens> > follow;
+//    compute_vector_follow(follow);
+//    std::vector< std::set<tokens> > first;
+//    compute_vector_first(first);
+//    std::vector< std::set<tokens> > select;
+//    int i=0;
+//    bool finish=false;
+//    for (std::vector<grammar_rule>::iterator it_g = grammar.begin(); it_g != grammar.end(); ++it_g){
+//        insert_set(select[i],first[*((*it_g).rhs.begin())],&finish);
+//        if (is_nullable((*it_g).rhs.begin())){
+//            insert_set(select[i],follow[(*it_g).lhs],&finish);
+//        }
+//    }
+}
 
 /**
  * implements an LL(1) parser for the grammar using yylex()
