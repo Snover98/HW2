@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
     bool parse = true;
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i <= argc; ++i) {
         if (strcmp(argv[i], "-nullable") == 0) {
             compute_nullable();
             parse = false;
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
             parse = false;
             continue;
         }
-        if (strcmp(argv[i], "-select") == 0) {
+        if (strcmp(argv[i], "-select") == 0 ) {
             compute_select();
             parse = false;
             continue;
