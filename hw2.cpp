@@ -160,16 +160,14 @@ void compute_follow() {
     print_follow(follow);
 }
 
-/**
- * computes select for all grammar rules (see grammar global variable in grammar.h)
- * calls print_select when finished
- */
-void compute_select(){
+
+//return a vetor of all the select sets for each rule in the grammar
+void compute_vector_select(std::vector< std::set<tokens> >& select){
     std::vector<std::set<tokens> > follow;
     compute_vector_follow(follow);
     std::vector< std::set<tokens> > first;
     compute_vector_first(first);
-    std::vector< std::set<tokens> > select;
+
     std::set<tokens> curr_rule_sel={};
 
     bool finish=false; //not really necessary
@@ -197,9 +195,30 @@ void compute_select(){
         }
         select.push_back(curr_rule_sel);
     }
+}
+
+/**
+ * computes select for all grammar rules (see grammar global variable in grammar.h)
+ * calls print_select when finished
+ */
+void compute_select(){
+    std::vector< std::set<tokens> > select;
+    compute_vector_select(select);
     print_select(select);
 }
 
+int select_for_single_rule (nonterminal X , tokens t ){
+    std::vector< std::set<tokens> > select;
+    compute_vector_select(select);
+    int num_rule=0;
+    for (std::vector<grammar_rule>::iterator it_g = grammar.begin(); it_g != grammar.end(); ++it_g){
+        if ((((*it_g).lhs) == X) && (((select[num_rule]).find(t)) != (select[num_rule]).end())){
+            return num_rule;
+        }
+        num_rule++;
+    }
+    return -1;
+}
 
 /**
  * implements an LL(1) parser for the grammar using yylex()
