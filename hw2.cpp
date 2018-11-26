@@ -186,7 +186,7 @@ void compute_select(){
             }
             else{
                 insert_set(curr_rule_sel,first[*it],&finish); //  insert the nonterminal to the select of the current rule
-                if (!is_nullable((nonterminal)*it)){ // if the nonterminal is not nullable 
+                if (!is_nullable((nonterminal)*it)){ // if the nonterminal is not nullable
                     rhs_nullable=false;
                     break;
                 }
@@ -229,13 +229,51 @@ void parser(){
         }
     }
 
+    //init token and queue
+    Q.push_back(S);
+    tokens t = (tokens)yylex();
 
+    //while the stack is not empty
+    while(!Q.empty()){
+        int res = Q.back();
+        Q.pop_back();
+        //if X is terminal
+        if(res > NONTERMINAL_ENUM_SIZE){
+            //if the terminal is the onew we need, move to the next one
+            if((tokens)res == t){
+                t = (tokens)yylex();
+            } else{
+                //otherwise we have an error and should break
+                break;
+            }
+        } else{//X is nonterminal
+            nonterminal X = (nonterminal)res;
+            //if there is a rule for these X and t
+            if(M.count(X) > 0 && M[X].count(t) > 0){
+                //print the number of the rule we are using
+                printf("%d\n", M[X][t]);
+                //make a copy of the right side of the rule
+                std::vector<int> rhs = std::vector<int>(grammar[M[X][t]-1].rhs);
+                //add all of the stuff in the rule in reverse order
+                while(!rhs.empty()){
+                    Q.push_back(rhs.back());
+                    rhs.pop_back();
+                }
+            } else {
+                //otherwise we have an error and should break
+                break;
+            }
+        }
+    }
 
+    //if the queue is not empty or if the last terminal isn't EOF, it's an error
+    if(!Q.empty() || t != EF){
+        printf("Syntax error\n");
+        exit(0);
+    }
 
-
-
-
-
+    //if we got here, we had a success!
+    printf("Success\n");
 }
 
 
