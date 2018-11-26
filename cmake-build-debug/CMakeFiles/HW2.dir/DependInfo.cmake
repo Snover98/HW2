@@ -4,9 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/user/Documents/GitHub/HW2/grammar.cpp" "C:/Users/user/Documents/GitHub/HW2/cmake-build-debug/CMakeFiles/HW2.dir/grammar.cpp.obj"
-  "C:/Users/user/Documents/GitHub/HW2/hw2.cpp" "C:/Users/user/Documents/GitHub/HW2/cmake-build-debug/CMakeFiles/HW2.dir/hw2.cpp.obj"
-  "C:/Users/user/Documents/GitHub/HW2/main.cpp" "C:/Users/user/Documents/GitHub/HW2/cmake-build-debug/CMakeFiles/HW2.dir/main.cpp.obj"
+  "D:/Technion/Compilation/HW/HW2/grammar.cpp" "D:/Technion/Compilation/HW/HW2/cmake-build-debug/CMakeFiles/HW2.dir/grammar.cpp.obj"
+  "D:/Technion/Compilation/HW/HW2/hw2.cpp" "D:/Technion/Compilation/HW/HW2/cmake-build-debug/CMakeFiles/HW2.dir/hw2.cpp.obj"
+  "D:/Technion/Compilation/HW/HW2/main.cpp" "D:/Technion/Compilation/HW/HW2/cmake-build-debug/CMakeFiles/HW2.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
