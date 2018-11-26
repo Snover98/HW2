@@ -128,7 +128,7 @@ tokens showInteger(int base){
 	/*print the integer in decimal*/
 	printTokenInt("INTEGER",integer);
 
-    yylval.ival = integer;
+//    yylval.ival = integer;
 	return INTEGER;
 }
 
@@ -240,11 +240,11 @@ tokens showString(){
 
 	printTokenString("STRING", copy_lexame);
 
-    yylval.text = copy_lexame;
+	free(copy_lexame);
+
+//    yylval.text = copy_lexame;
 
     return STRING;
-
-//	free(copy_lexame);
 }
 
 /*converts hexadecimal digit to the actual num*/
@@ -302,9 +302,9 @@ tokens showToken(char* token, tokens token_type){
 	/*print the token*/
 	printTokenString(token,yytext);
 
-	char* copy_lexame = (char*)malloc(yyleng*sizeof(char));
-
-    yylval.text = copy_lexame;
+//	char* copy_lexame = (char*)malloc(yyleng*sizeof(char));
+//
+//    yylval.text = copy_lexame;
 
     return token_type;
 }
