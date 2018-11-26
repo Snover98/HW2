@@ -10,9 +10,9 @@
 #define NON_ESCAPE 'E'
 #define HEXADECIMAL 'X'
 
-void showToken(char* token);
-void showInteger(int base);
-void showString();
+tokens showToken(char* token, tokens token_type);
+tokens showInteger(int base);
+tokens showString();
 char hexToNum(char hex);
 char convertEscape(char e);
 void badInput(char* input);
@@ -25,7 +25,7 @@ bool isPrintable(char c);
 %option yylineno
 %option caseless
 
-%s KEY
+%s KEYCOND
 %s ASSORIND
 %x UNBLSTR
 
@@ -42,75 +42,76 @@ unblockedString (({letter})(([ -\"$-+\--:<-~\t]*)([!-\"$-+\--:<-~]))?)
 %%
 
 ^{key}																				{ /*KEY*/
-showToken("KEY");
-BEGIN(KEY);
-}
-\[{key}\]																			showToken("SECTION"); /*SECTION*/
+																						showToken("KEY");
+																						BEGIN(KEYCOND);
+																					}
+																					
+\[{key}\]																			return showToken("SECTION", SECTION); /*SECTION*/
 
 ^([\t ]+)/([^#;\t ])																{ /*INDENT*/
-showToken("INDENT");
-BEGIN(ASSORIND);
-}
+																						showToken("INDENT");
+																						BEGIN(ASSORIND);
+																					}
 
 
 <*>[\t ]+																			; /*WHITESPACE*/
 
 <*>[\n\r]+																			BEGIN(0); /*NEWLINE*/
 
-<KEY>([:=])/([ \t]*[:=])															showToken("ASSIGN");
+<KEYCOND>([:=])/([ \t]*[:=])														return showToken("ASSIGN", ASSIGN);
 
-<KEY>([:=])																			{ /*ASSIGN*/
-showToken("ASSIGN");
-BEGIN(ASSORIND);
-}
+<KEYCOND>([:=])																		{ /*ASSIGN*/
+																						BEGIN(ASSORIND);
+																						return showToken("ASSIGN", ASSIGN);
+                                                                                    }
 
-(([#;])((.)*[^ \t\r\n])?)/(([\t ]*))												showToken("COMMENT"); /*COMMENT*/
+(([#;])((.)*[^ \t\r\n])?)/(([\t ]*))												showToken("COMMENT", EF); /*COMMENT*/
 
 <<EOF>>																				{
-showToken("EOF"); /*EOF*/
-exit(0);
-}
+																						return showToken("EOF", EF); /*EOF*/
+																						exit(0);
+																					}
 
-<ASSORIND>((true)|(yes))															showToken("TRUE"); /*THESE ONES MAY ONLY APPEAR AFTER ASSIGN OR INDENT*/ /*TRUE*/
+<ASSORIND>((true)|(yes))															return showToken("TRUE", TRUE); /*THESE ONES MAY ONLY APPEAR AFTER ASSIGN OR INDENT*/ /*TRUE*/
 
-<ASSORIND>((false)|(no))															showToken("FALSE"); /*FALSE*/
+<ASSORIND>((false)|(no))															return showToken("FALSE", FALSE); /*FALSE*/
 
-<ASSORIND>([\+\-]?([0-9]*(\.)[0-9]+)(e([\+-])[0-9]+)?)								showToken("REAL"); /*REAL*/
-<ASSORIND>([\+\-]?([0-9]+(\.)[0-9]*)(e([\+-])[0-9]+)?)								showToken("REAL"); /*REAL*/
+<ASSORIND>([\+\-]?([0-9]*(\.)[0-9]+)(e([\+-])[0-9]+)?)								return showToken("REAL", REAL); /*REAL*/
+<ASSORIND>([\+\-]?([0-9]+(\.)[0-9]*)(e([\+-])[0-9]+)?)								return showToken("REAL", REAL); /*REAL*/
 
-<ASSORIND>({hexadecimal})															showInteger(16); /*INTEGER - hexadecimal number*/
+<ASSORIND>({hexadecimal})															return showInteger(16); /*INTEGER - hexadecimal number*/
 
-<ASSORIND>("0b"[01]*)																showInteger(2); /*INTEGER - binary number*/
+<ASSORIND>("0b"[01]*)																return showInteger(2); /*INTEGER - binary number*/
 
-<ASSORIND>(0[0-7]*)																	showInteger(8); /*INTEGER - octal number*/
+<ASSORIND>(0[0-7]*)																	return showInteger(8); /*INTEGER - octal number*/
 
-<ASSORIND>([\+\-]?{digit}+)															showInteger(10); /*INTEGER - decimal number*/
+<ASSORIND>([\+\-]?{digit}+)															return showInteger(10); /*INTEGER - decimal number*/
 
-<ASSORIND>({file}+)																	showToken("PATH"); /*PATH*/
+<ASSORIND>({file}+)																	return showToken("PATH", PATH); /*PATH*/
 
-<ASSORIND>(\$\{({key}#)?{key}\})													showToken("LINK"); /*LINK*/
+<ASSORIND>(\$\{({key}#)?{key}\})													return showToken("LINK", LINK); /*LINK*/
 
-<ASSORIND>((\")([^\"\\]|{escape})*(\"))												showString();
+<ASSORIND>((\")([^\"\\]|{escape})*(\"))												return showString();
 
-<ASSORIND>((\")(([^\"]))*[\"]?)														showString();
+<ASSORIND>((\")(([^\"]))*[\"]?)														return showString();
 
 <ASSORIND>{letter}																	{
-BEGIN(UNBLSTR);
-yyless(0);
-}
+																						BEGIN(UNBLSTR);
+																						yyless(0);
+																					}
 
 <UNBLSTR>{unblockedString}															{/*unblocked string*/
-showToken("STRING");
-BEGIN(ASSORIND);
-}
+																						BEGIN(ASSORIND);
+																						return showToken("STRING");
+																					}
 
-<ASSORIND>[,]																		showToken("SEP"); /*SEP*/
+<ASSORIND>[,]																		return showToken("SEP", SEP); /*SEP*/
 
 <*>.																				badInput(yytext); /*DEFAULT*/
 %%
 
 /*handle integer token*/
-void showInteger(int base){
+tokens showInteger(int base){
 	/*the actual number*/
 	long integer = 0;
 
@@ -126,6 +127,9 @@ void showInteger(int base){
 
 	/*print the integer in decimal*/
 	printTokenInt("INTEGER",integer);
+
+    yylval.ival = integer;
+	return INTEGER;
 }
 
 /*boolean function that tells you if a char is printable*/
@@ -134,7 +138,7 @@ bool isPrintable(char c){
 }
 
 /*handle string token*/
-void showString(){
+tokens showString(){
 	char* copy_lexame;
 	char* cur_ptr;
 	char cur_val = 0;
@@ -236,7 +240,11 @@ void showString(){
 
 	printTokenString("STRING", copy_lexame);
 
-	free(copy_lexame);
+    yylval.text = copy_lexame;
+
+    return STRING;
+
+//	free(copy_lexame);
 }
 
 /*converts hexadecimal digit to the actual num*/
@@ -290,10 +298,15 @@ char convertEscape(char e){
 }
 
 
-void showToken(char* token){
+tokens showToken(char* token, tokens token_type){
 	/*print the token*/
 	printTokenString(token,yytext);
 
+	char* copy_lexame = (char*)malloc(yyleng*sizeof(char));
+
+    yylval.text = copy_lexame;
+
+    return token_type;
 }
 
 /*print error and exit when get illegal input*/
