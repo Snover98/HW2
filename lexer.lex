@@ -42,15 +42,15 @@ unblockedString (({letter})(([ -\"$-+\--:<-~\t]*)([!-\"$-+\--:<-~]))?)
 %%
 
 ^{key}																				{ /*KEY*/
-																						showToken("KEY");
 																						BEGIN(KEYCOND);
+return showToken("KEY", KEY);
 																					}
 																					
 \[{key}\]																			return showToken("SECTION", SECTION); /*SECTION*/
 
 ^([\t ]+)/([^#;\t ])																{ /*INDENT*/
-																						showToken("INDENT");
 																						BEGIN(ASSORIND);
+																						return showToken("INDENT", INDENT);
 																					}
 
 
@@ -102,7 +102,7 @@ unblockedString (({letter})(([ -\"$-+\--:<-~\t]*)([!-\"$-+\--:<-~]))?)
 
 <UNBLSTR>{unblockedString}															{/*unblocked string*/
 																						BEGIN(ASSORIND);
-																						return showToken("STRING");
+																						return showToken("STRING", STRING);
 																					}
 
 <ASSORIND>[,]																		return showToken("SEP", SEP); /*SEP*/
@@ -126,7 +126,7 @@ tokens showInteger(int base){
 
 
 	/*print the integer in decimal*/
-	printTokenInt("INTEGER",integer);
+//	printTokenInt("INTEGER",integer);
 
 //    yylval.ival = integer;
 	return INTEGER;
@@ -238,7 +238,7 @@ tokens showString(){
 	/*put an \0 at the end of the string*/
 	*cur_ptr = '\0';
 
-	printTokenString("STRING", copy_lexame);
+//	printTokenString("STRING", copy_lexame);
 
 	free(copy_lexame);
 
@@ -300,7 +300,7 @@ char convertEscape(char e){
 
 tokens showToken(char* token, tokens token_type){
 	/*print the token*/
-	printTokenString(token,yytext);
+//	printTokenString(token,yytext);
 
 //	char* copy_lexame = (char*)malloc(yyleng*sizeof(char));
 //
