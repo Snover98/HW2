@@ -236,12 +236,12 @@ void parser(){
     //while the stack is not empty
     while(!Q.empty()){
         int res = Q.back();
-        Q.pop_back();
         //if X is terminal
         if(res > NONTERMINAL_ENUM_SIZE){
-            //if the terminal is the onew we need, move to the next one
+            //if the terminal is the one we need, move to the next one
             if((tokens)res == t){
                 t = (tokens)yylex();
+                Q.pop_back();
             } else{
                 //otherwise we have an error and should break
                 break;
@@ -250,6 +250,8 @@ void parser(){
             nonterminal X = (nonterminal)res;
             //if there is a rule for these X and t
             if(M.count(X) > 0 && M[X].count(t) > 0){
+                //pop X out of the stack
+                Q.pop_back();
                 //print the number of the rule we are using
                 printf("%d\n", M[X][t]);
                 //make a copy of the right side of the rule
