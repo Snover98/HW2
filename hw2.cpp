@@ -2,6 +2,7 @@
 // Created by user on 22/11/2018.
 //
 
+#include <map>
 #include "hw2.h"
 
 
@@ -200,6 +201,41 @@ void compute_select(){
 }
 
 
+/**
+ * implements an LL(1) parser for the grammar using yylex()
+ */
+void parser(){
+    //the stack Q and the table M
+    std::vector<int> Q = std::vector<int>();
+    std::map<nonterminal, std::map<tokens, int>> M = std::map<nonterminal, std::map<tokens, int>>();
 
+    //vectors of terminals and nonterminals for convinience
+    std::vector<tokens> T {KEY, SECTION, INDENT, ASSIGN, TRUE, FALSE, INTEGER, REAL, STRING, PATH, LINK, SEP, EF};
+    std::vector<nonterminal> V {S, Sections, Section, Keys, Key, Assign, Values, MoreValues, IndentedValues, Value};
+
+    //initialize the map M
+    //for each nonterminal
+    for(auto const& X: V){
+        //for each terminal
+        for(auto const& t: T){
+            //for each rule in the grammar that starts with X
+            for(int rule_num = 1; rule_num <= grammar.size(); rule_num++){
+                //if is in select of the rule
+                //@TODO make a function that checks if t is in r's select
+                if(grammar[rule_num-1].lhs == X && t in select(grammar[rule_num-1])){
+                    M[X][t] = rule_num;
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+}
 
 
